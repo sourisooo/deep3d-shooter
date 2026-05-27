@@ -1,0 +1,206 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/Player.gd" id="101"]
+[ext_resource type="Script" path="res://scripts/Target.gd" id="102"]
+[ext_resource type="Script" path="res://scripts/EnemySpawner.gd" id="103"]
+[ext_resource type="PackedScene" path="res://scenes/Target.tscn" id="104"]
+[ext_resource type="PackedScene" path="res://scenes/Zombie.tscn" id="105"]
+
+[sub_resource type="Environment" id="1"]
+background_color = Color(0.5, 0.7, 1, 1)
+ambient_light_color = Color(0.5, 0.5, 0.5, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="CapsuleShape3D" id="2"]
+[sub_resource type="BoxMesh" id="3"]
+[sub_resource type="BoxShape3D" id="4"]
+[sub_resource type="BoxShape3D" id="5"]
+[sub_resource type="BoxMesh" id="9"]
+
+[sub_resource type="StandardMaterial3D" id="7"]
+albedo_color = Color(0, 0.6, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="10"]
+albedo_color = Color(0.3, 0.3, 0.3, 1)
+
+[node name="World" type="Node3D"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("1")
+[node name="Ground" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.5, 0)
+[node name="GroundMesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("3")
+scale = Vector3(60, 0.1, 60)
+material_override = SubResource("7")
+[node name="GroundCol" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("4")
+scale = Vector3(60, 0.1, 60)
+[node name="NWall" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.5, -25)
+[node name="NWallMesh" type="MeshInstance3D" parent="NWall"]
+mesh = SubResource("9")
+scale = Vector3(50, 3, 0.5)
+material_override = SubResource("10")
+[node name="NWallCol" type="CollisionShape3D" parent="NWall"]
+shape = SubResource("5")
+scale = Vector3(50, 3, 0.5)
+[node name="SWall" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.5, 25)
+[node name="SWallMesh" type="MeshInstance3D" parent="SWall"]
+mesh = SubResource("9")
+scale = Vector3(50, 3, 0.5)
+material_override = SubResource("10")
+[node name="SWallCol" type="CollisionShape3D" parent="SWall"]
+shape = SubResource("5")
+scale = Vector3(50, 3, 0.5)
+[node name="WWall" type="StaticBody3D" parent="."]
+position = Vector3(-25, 1.5, 0)
+[node name="WWallMesh" type="MeshInstance3D" parent="WWall"]
+mesh = SubResource("9")
+scale = Vector3(0.5, 3, 50)
+material_override = SubResource("10")
+[node name="WWallCol" type="CollisionShape3D" parent="WWall"]
+shape = SubResource("5")
+scale = Vector3(0.5, 3, 50)
+[node name="EWall" type="StaticBody3D" parent="."]
+position = Vector3(25, 1.5, 0)
+[node name="EWallMesh" type="MeshInstance3D" parent="EWall"]
+mesh = SubResource("9")
+scale = Vector3(0.5, 3, 50)
+material_override = SubResource("10")
+[node name="EWallCol" type="CollisionShape3D" parent="EWall"]
+shape = SubResource("5")
+scale = Vector3(0.5, 3, 50)
+[node name="HWall01" type="StaticBody3D" parent="."]
+position = Vector3(-8, 1.5, -18)
+[node name="HWall01Mesh" type="MeshInstance3D" parent="HWall01"]
+mesh = SubResource("9")
+scale = Vector3(16, 3, 0.5)
+material_override = SubResource("10")
+[node name="HWall01Col" type="CollisionShape3D" parent="HWall01"]
+shape = SubResource("5")
+scale = Vector3(16, 3, 0.5)
+[node name="HWall02" type="StaticBody3D" parent="."]
+position = Vector3(8, 1.5, -10)
+[node name="HWall02Mesh" type="MeshInstance3D" parent="HWall02"]
+mesh = SubResource("9")
+scale = Vector3(16, 3, 0.5)
+material_override = SubResource("10")
+[node name="HWall02Col" type="CollisionShape3D" parent="HWall02"]
+shape = SubResource("5")
+scale = Vector3(16, 3, 0.5)
+[node name="HWall03" type="StaticBody3D" parent="."]
+position = Vector3(-8, 1.5, -2)
+[node name="HWall03Mesh" type="MeshInstance3D" parent="HWall03"]
+mesh = SubResource("9")
+scale = Vector3(16, 3, 0.5)
+material_override = SubResource("10")
+[node name="HWall03Col" type="CollisionShape3D" parent="HWall03"]
+shape = SubResource("5")
+scale = Vector3(16, 3, 0.5)
+[node name="HWall04" type="StaticBody3D" parent="."]
+position = Vector3(8, 1.5, 6)
+[node name="HWall04Mesh" type="MeshInstance3D" parent="HWall04"]
+mesh = SubResource("9")
+scale = Vector3(16, 3, 0.5)
+material_override = SubResource("10")
+[node name="HWall04Col" type="CollisionShape3D" parent="HWall04"]
+shape = SubResource("5")
+scale = Vector3(16, 3, 0.5)
+[node name="HWall05" type="StaticBody3D" parent="."]
+position = Vector3(-8, 1.5, 14)
+[node name="HWall05Mesh" type="MeshInstance3D" parent="HWall05"]
+mesh = SubResource("9")
+scale = Vector3(16, 3, 0.5)
+material_override = SubResource("10")
+[node name="HWall05Col" type="CollisionShape3D" parent="HWall05"]
+shape = SubResource("5")
+scale = Vector3(16, 3, 0.5)
+[node name="VWall01" type="StaticBody3D" parent="."]
+position = Vector3(-16, 1.5, -14)
+[node name="VWall01Mesh" type="MeshInstance3D" parent="VWall01"]
+mesh = SubResource("9")
+scale = Vector3(0.5, 3, 16)
+material_override = SubResource("10")
+[node name="VWall01Col" type="CollisionShape3D" parent="VWall01"]
+shape = SubResource("5")
+scale = Vector3(0.5, 3, 16)
+[node name="VWall02" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.5, -6)
+[node name="VWall02Mesh" type="MeshInstance3D" parent="VWall02"]
+mesh = SubResource("9")
+scale = Vector3(0.5, 3, 16)
+material_override = SubResource("10")
+[node name="VWall02Col" type="CollisionShape3D" parent="VWall02"]
+shape = SubResource("5")
+scale = Vector3(0.5, 3, 16)
+[node name="VWall03" type="StaticBody3D" parent="."]
+position = Vector3(16, 1.5, 2)
+[node name="VWall03Mesh" type="MeshInstance3D" parent="VWall03"]
+mesh = SubResource("9")
+scale = Vector3(0.5, 3, 16)
+material_override = SubResource("10")
+[node name="VWall03Col" type="CollisionShape3D" parent="VWall03"]
+shape = SubResource("5")
+scale = Vector3(0.5, 3, 16)
+[node name="VWall04" type="StaticBody3D" parent="."]
+position = Vector3(-16, 1.5, 10)
+[node name="VWall04Mesh" type="MeshInstance3D" parent="VWall04"]
+mesh = SubResource("9")
+scale = Vector3(0.5, 3, 16)
+material_override = SubResource("10")
+[node name="VWall04Col" type="CollisionShape3D" parent="VWall04"]
+shape = SubResource("5")
+scale = Vector3(0.5, 3, 16)
+[node name="VWall05" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.5, 18)
+[node name="VWall05Mesh" type="MeshInstance3D" parent="VWall05"]
+mesh = SubResource("9")
+scale = Vector3(0.5, 3, 16)
+material_override = SubResource("10")
+[node name="VWall05Col" type="CollisionShape3D" parent="VWall05"]
+shape = SubResource("5")
+scale = Vector3(0.5, 3, 16)
+[node name="Spawner" type="Node3D" parent="."]
+script = ExtResource("103")
+target_scene = ExtResource("104")
+zombie_scene = ExtResource("105")
+[node name="Player" type="CharacterBody3D" parent="."]
+position = Vector3(0, 1, 0)
+script = ExtResource("101")
+collision_layer = 2
+collision_mask = 3
+[node name="PlayerCol" type="CollisionShape3D" parent="Player"]
+shape = SubResource("2")
+[node name="PlayerCam" type="Camera3D" parent="Player"]
+position = Vector3(0, 0.7, 0)
+[node name="HealthUI" type="Control" parent="Player"]
+offset_left = 10
+offset_top = 10
+[node name="Heart1" type="ColorRect" parent="Player/HealthUI"]
+offset_left = 0
+offset_top = 0
+size = Vector2(20, 20)
+color = Color(1, 0, 0, 1)
+[node name="Heart2" type="ColorRect" parent="Player/HealthUI"]
+offset_left = 25
+offset_top = 0
+size = Vector2(20, 20)
+color = Color(1, 0, 0, 1)
+[node name="Heart3" type="ColorRect" parent="Player/HealthUI"]
+offset_left = 50
+offset_top = 0
+size = Vector2(20, 20)
+color = Color(1, 0, 0, 1)
+
+[node name="DamageVignetteLayer" type="CanvasLayer" parent="Player"]
+layer = 10
+
+[node name="DamageVignette" type="ColorRect" parent="Player/DamageVignetteLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+size = Vector2(0, 0)
+color = Color(0.8, 0, 0, 0)
+mouse_filter = 2
+visible = false
