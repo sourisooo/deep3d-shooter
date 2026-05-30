@@ -1,0 +1,25 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" uid="uid://be2bx6buhgp44" path="res://assets/godot_imports/leon_kennedy_rigged.glb" id="1"]
+[ext_resource type="PackedScene" uid="uid://b62gont011pdh" path="res://assets/godot_imports/leon_walking.glb" id="2"]
+[ext_resource type="PackedScene" uid="uid://bi022ojpvvxph" path="res://assets/godot_imports/leon_shoot.glb" id="3"]
+[ext_resource type="Script" uid="uid://qqaj7prl6ood" path="res://scripts/LeonAnimator.gd" id="4"]
+[ext_resource type="PackedScene" path="res://assets/godot_imports/sci_fi_pistol.glb" id="5"]
+
+[node name="LeonCharacter" type="Node3D"]
+script = ExtResource("4")
+
+[node name="Model" parent="." instance=ExtResource("1")]
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="WalkAnim" parent="." instance=ExtResource("2")]
+rotation = Vector3(0, 3.14159, 0)
+visible = false
+
+[node name="ShootAnim" parent="." instance=ExtResource("3")]
+rotation = Vector3(0, 3.14159, 0)
+visible = false
+
+[node name="GunAnchor" type="Node3D" parent="."]
+
+[node name="Pistol" parent="GunAnchor" instance=ExtResource("5")]

@@ -1,0 +1,131 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/Target.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/HealthBar3D.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/BodyPartHitbox.gd" id="3"]
+
+[sub_resource type="BoxMesh" id="1"]
+[sub_resource type="BoxShape3D" id="2"]
+[sub_resource type="BoxShape3D" id="4"]
+
+[sub_resource type="StandardMaterial3D" id="3"]
+albedo_color = Color(0.4, 0.4, 0.8, 1)
+
+[node name="Target" type="CharacterBody3D"]
+script = ExtResource("1")
+position = Vector3(0, 0, 0)
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("2")
+scale = Vector3(1.5, 2.0, 1.5)
+
+[node name="HitArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 3
+
+[node name="AreaShape" type="CollisionShape3D" parent="HitArea"]
+shape = SubResource("2")
+scale = Vector3(0.8, 1.6, 0.6)
+
+[node name="HeadHitbox" type="Area3D" parent="HitArea"]
+collision_layer = 1
+script = ExtResource("3")
+damage_multiplier = 2.0
+part_name = "head"
+
+[node name="Mesh" type="MeshInstance3D" parent="HitArea/HeadHitbox"]
+position = Vector3(0, 1.5, 0)
+mesh = SubResource("1")
+scale = Vector3(0.4, 0.4, 0.4)
+material_override = SubResource("3")
+
+[node name="Shape" type="CollisionShape3D" parent="HitArea/HeadHitbox"]
+shape = SubResource("4")
+scale = Vector3(0.4, 0.4, 0.4)
+position = Vector3(0, 1.5, 0)
+
+[node name="BodyHitbox" type="Area3D" parent="HitArea"]
+script = ExtResource("3")
+damage_multiplier = 1.0
+part_name = "body"
+
+[node name="Mesh" type="MeshInstance3D" parent="HitArea/BodyHitbox"]
+position = Vector3(0, 0.75, 0)
+mesh = SubResource("1")
+scale = Vector3(0.6, 0.9, 0.4)
+material_override = SubResource("3")
+
+[node name="Shape" type="CollisionShape3D" parent="HitArea/BodyHitbox"]
+shape = SubResource("4")
+scale = Vector3(0.6, 0.9, 0.4)
+position = Vector3(0, 0.75, 0)
+
+[node name="LeftArmHitbox" type="Area3D" parent="HitArea"]
+script = ExtResource("3")
+damage_multiplier = 0.5
+part_name = "left_arm"
+
+[node name="Mesh" type="MeshInstance3D" parent="HitArea/LeftArmHitbox"]
+position = Vector3(-0.5, 1.0, 0)
+mesh = SubResource("1")
+scale = Vector3(0.2, 0.8, 0.2)
+material_override = SubResource("3")
+
+[node name="Shape" type="CollisionShape3D" parent="HitArea/LeftArmHitbox"]
+shape = SubResource("4")
+scale = Vector3(0.2, 0.8, 0.2)
+position = Vector3(-0.5, 1.0, 0)
+
+[node name="RightArmHitbox" type="Area3D" parent="HitArea"]
+script = ExtResource("3")
+damage_multiplier = 0.5
+part_name = "right_arm"
+
+[node name="Mesh" type="MeshInstance3D" parent="HitArea/RightArmHitbox"]
+position = Vector3(0.5, 1.0, 0)
+mesh = SubResource("1")
+scale = Vector3(0.2, 0.8, 0.2)
+material_override = SubResource("3")
+
+[node name="Shape" type="CollisionShape3D" parent="HitArea/RightArmHitbox"]
+shape = SubResource("4")
+scale = Vector3(0.2, 0.8, 0.2)
+position = Vector3(0.5, 1.0, 0)
+
+[node name="LeftLegHitbox" type="Area3D" parent="HitArea"]
+script = ExtResource("3")
+damage_multiplier = 0.5
+part_name = "left_leg"
+
+[node name="Mesh" type="MeshInstance3D" parent="HitArea/LeftLegHitbox"]
+position = Vector3(-0.25, 0.3, 0)
+mesh = SubResource("1")
+scale = Vector3(0.25, 1.2, 0.25)
+material_override = SubResource("3")
+
+[node name="Shape" type="CollisionShape3D" parent="HitArea/LeftLegHitbox"]
+shape = SubResource("4")
+scale = Vector3(0.25, 1.2, 0.25)
+position = Vector3(-0.25, 0.3, 0)
+
+[node name="RightLegHitbox" type="Area3D" parent="HitArea"]
+script = ExtResource("3")
+damage_multiplier = 0.5
+part_name = "right_leg"
+
+[node name="Mesh" type="MeshInstance3D" parent="HitArea/RightLegHitbox"]
+position = Vector3(0.25, 0.3, 0)
+mesh = SubResource("1")
+scale = Vector3(0.25, 1.2, 0.25)
+material_override = SubResource("3")
+
+[node name="Shape" type="CollisionShape3D" parent="HitArea/RightLegHitbox"]
+shape = SubResource("4")
+scale = Vector3(0.25, 1.2, 0.25)
+position = Vector3(0.25, 0.3, 0)
+
+[node name="HealthBar3D" type="Node3D" parent="."]
+script = ExtResource("2")
+bar_offset_y = 2.2
