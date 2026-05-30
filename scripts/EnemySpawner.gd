@@ -5,10 +5,13 @@ var grid_size: Vector2i = Vector2i(50, 50)
 var cell_size: float = 1.0
 var zombie_registry: Dictionary = {}
 var target_registry: Dictionary = {}
+var displaymodel_registry: Dictionary = {}
 
 @export var target_scene: PackedScene
 @export var zombie_scene: PackedScene
+@export var displaymodel_scene: PackedScene
 @export var max_zombies: int = 5
+@export var max_displaymodels: int = 3
 @export var target_count: int = 6
 
 const KILL_TRACKER = preload("res://scripts/KillTracker.gd")
@@ -17,6 +20,7 @@ func _ready():
 	_initialize_grid()
 	_spawn_targets()
 	_spawn_initial_zombies()
+	_spawn_initial_displaymodels()
 
 func _process(_delta):
 	# Clean up dead zombies from tracking registry
@@ -33,11 +37,24 @@ func _process(_delta):
 			grid[old_grid_pos.x][old_grid_pos.y] = "E"
 			target_registry.erase(target)
 	
+	# Clean up dead displaymodels from tracking registry
+	for dm in displaymodel_registry.keys():
+		if not is_instance_valid(dm) or not dm.is_inside_tree():
+			var old_grid_pos = displaymodel_registry[dm]
+			grid[old_grid_pos.x][old_grid_pos.y] = "E"
+			displaymodel_registry.erase(dm)
+	
 	# Fill up zombies
 	if zombie_registry.size() < max_zombies:
 		var new_positions = _find_empty_positions(1, 12.0, 23.0, "Z")
 		if new_positions.size() > 0:
 			_spawn_zombie_at(new_positions[0])
+	
+	# Fill up displaymodels
+	if displaymodel_registry.size() < max_displaymodels:
+		var new_positions = _find_empty_positions(1, 10.0, 24.0, "D")
+		if new_positions.size() > 0:
+			_spawn_displaymodel_at(new_positions[0])
 	
 	# Fill up targets
 	if target_registry.size() < target_count:
@@ -124,3 +141,17 @@ func _spawn_zombie_at(grid_pos: Vector2i):
 	zombie.position = world_pos
 	add_child(zombie)
 	zombie_registry[zombie] = grid_pos
+
+func _spawn_initial_displaymodels():
+	for i in range(max_displaymodels):
+		var positions = _find_empty_positions(1, 10.0, 24.0, "D")
+		if positions.size() > 0:
+			_spawn_displaymodel_at(positions[0])
+
+func _spawn_displaymodel_at(grid_pos: Vector2i):
+	var world_pos = _grid_to_world(grid_pos, 0.0)
+	var dm = displaymodel_scene.instantiate()
+	dm.position = world_pos
+	dm.target_grid_pos = grid_pos
+	add_child(dm)
+	displaymodel_registry[dm] = grid_pos

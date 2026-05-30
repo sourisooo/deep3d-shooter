@@ -5,10 +5,15 @@ extends CharacterBody3D
 @export var attack_range: float = 2.0
 @export var attack_damage: int = 1
 @export var attack_cooldown: float = 1.5
+@export var ranged_attack_range: float = 24.0
+@export var projectile_speed: float = 6.0
+@export var ranged_attack_cooldown: float = 3.0
 
 var health: int
 var player: Node3D = null
 var can_attack: bool = true
+var can_ranged_attack: bool = true
+var is_aggroed: bool = false
 
 @onready var mesh_instance: MeshInstance3D = $MeshInstance3D
 @onready var attack_timer: Timer = $AttackTimer
@@ -16,6 +21,7 @@ var can_attack: bool = true
 
 const HIT_EFFECT = preload("res://scripts/HitEffect.gd")
 const KILL_TRACKER = preload("res://scripts/KillTracker.gd")
+const ZOMBIE_PROJECTILE = preload("res://scripts/ZombieProjectile.gd")
 
 func _ready():
 	health = max_health
@@ -38,15 +44,31 @@ func _physics_process(delta):
 	dir.y = 0
 	dir = dir.normalized()
 	
-	velocity = dir * move_speed
+	# Auto-aggro when player is within ranged attack range
+	if dist <= ranged_attack_range:
+		is_aggroed = true
 	
+	if not is_aggroed:
+		return
+	
+	# Face the player
 	if dir.length() > 0:
 		look_at(global_position + dir, Vector3.UP)
 	
-	move_and_slide()
-	
-	if dist <= attack_range and can_attack:
+	# Ranged attack at medium range (between melee and max range)
+	if dist > attack_range and dist <= ranged_attack_range and can_ranged_attack:
+		velocity = Vector3.ZERO
+		ranged_attack()
+	elif dist <= attack_range and can_attack:
+		velocity = Vector3.ZERO
 		attack()
+	else:
+		# Move toward player
+		velocity = dir * move_speed
+		if dist < 0.8:
+			velocity = Vector3.ZERO
+	
+	move_and_slide()
 
 func attack():
 	can_attack = false
@@ -61,18 +83,52 @@ func attack():
 				player.take_damage(attack_damage)
 	)
 
+func ranged_attack():
+	can_ranged_attack = false
+	
+	# Create the projectile
+	var projectile = Node3D.new()
+	projectile.set_script(ZOMBIE_PROJECTILE)
+	projectile.target_player = player
+	projectile.speed = projectile_speed
+	projectile.damage = attack_damage
+	
+	# Spawn from zombie's position (chest level)
+	var spawn_pos = global_position + Vector3(0, 0.8, 0) + global_transform.basis.z * -0.5
+	projectile.global_position = spawn_pos
+	
+	# Aim directly at the player's center
+	if is_instance_valid(player):
+		var aim_dir = (player.global_position - spawn_pos).normalized()
+		projectile.direction = aim_dir
+	
+	# Add to the scene tree
+	var world_root = get_tree().root
+	world_root.add_child(projectile)
+	
+	# Cooldown timer
+	await get_tree().create_timer(ranged_attack_cooldown).timeout
+	if is_instance_valid(self):
+		can_ranged_attack = true
+
 func hit(hit_position := global_position):
+	print("Zombie hit() called!")
 	_spawn_hit_effect(hit_position)
+	is_aggroed = true
+	_activate_aggro()
 	take_damage(1)
 
 func take_damage(amount: int):
 	health -= amount
+	is_aggroed = true
+	_activate_aggro()
 	print("Zombie took damage! Health: ", health)
 	
 	# Update health bar
 	if health_bar and health_bar.has_method("set_health_ratio"):
 		health_bar.set_health_ratio(float(health) / float(max_health))
 	
+	# Flash white on hit
 	var mat = StandardMaterial3D.new()
 	mat.albedo_color = Color(1, 0.2, 0.2)
 	mesh_instance.material_override = mat
@@ -83,16 +139,30 @@ func take_damage(amount: int):
 	if health <= 0:
 		die()
 
+func _activate_aggro():
+	if not is_aggroed:
+		is_aggroed = true
+		# Optional: visual flash to indicate aggro
+		var mat = StandardMaterial3D.new()
+		mat.albedo_color = Color(1, 0.5, 0)
+		mat.emission_enabled = true
+		mat.emission = Color(1, 0.3, 0)
+		mat.emission_energy_multiplier = 0.5
+		mesh_instance.material_override = mat
+		await get_tree().create_timer(0.15).timeout
+		if is_instance_valid(mesh_instance):
+			mesh_instance.material_override = null
+
 func _spawn_hit_effect(pos: Vector3):
 	if HIT_EFFECT:
 		HIT_EFFECT.spawn(pos, 5)
 
 func die():
-	# Check if this is a special kill (every 3rd)
-	var is_special = KILL_TRACKER.register_kill()
+	KILL_TRACKER.register_kill()
 	
-	if is_special:
-		_spawn_big_effect()
+	# Activate buff on the player (faster recoil/fire rate for 10s)
+	if player and player.has_method("activate_kill_buff"):
+		player.activate_kill_buff()
 	
 	var tween = create_tween()
 	tween.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.3)
@@ -105,3 +175,5 @@ func _spawn_big_effect():
 
 func _on_attack_timer_timeout():
 	can_attack = true
+
+

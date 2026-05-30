@@ -8,7 +8,8 @@ var speed: float = 1.5
 var time: float = 0.0
 var player_ref: Node = null
 var damage_cooldown: float = 0.0
-var aggro_range: float = 15.0
+var aggro_range: float = 30.0
+var is_aggroed: bool = false
 var target_grid_pos: Vector2i = Vector2i(-1, -1)
 
 const HIT_EFFECT = preload("res://scripts/HitEffect.gd")
@@ -35,15 +36,15 @@ func _physics_process(delta):
 	time += delta * speed
 	damage_cooldown = max(damage_cooldown - delta, 0)
 	
-	if not player_ref:
-		for child in get_tree().root.get_children():
-			var world = child
-			for c in world.get_children():
-				if c is CharacterBody3D and c.name == "Player":
-					player_ref = c
-					break
+	if not player_ref or (not is_instance_valid(player_ref)):
+		player_ref = get_tree().get_first_node_in_group("player")
 	
-	if player_ref:
+	if is_aggroed:
+		if not player_ref:
+			# No player found, can't chase
+			velocity = Vector3(0, velocity.y, 0)
+			move_and_slide()
+			return
 		var dir = (player_ref.global_position - global_position)
 		var dist = dir.length()
 		dir.y = 0
@@ -60,6 +61,17 @@ func _physics_process(delta):
 						player_ref.take_damage(1)
 			else:
 				velocity = Vector3(0, velocity.y, 0)
+	else:
+		# Not aggroed - attack if player is close, otherwise stay still
+		if player_ref:
+			var dir = (player_ref.global_position - global_position)
+			var dist = dir.length()
+			dir.y = 0
+			if dist < 1.8 and damage_cooldown == 0:
+				damage_cooldown = 1.5
+				if player_ref.has_method("take_damage"):
+					player_ref.take_damage(1)
+		velocity = Vector3(0, velocity.y, 0)
 	
 	if not is_on_floor():
 		velocity.y -= 9.8 * delta
@@ -76,8 +88,11 @@ func _physics_process(delta):
 
 
 func hit(hit_position := global_position):
+	print("Target hit() called!")
 	# Spawn hit effect at the hit location
 	_spawn_hit_effect(hit_position)
+	is_aggroed = true
+	_activate_aggro()
 	
 	hp -= 1
 	
@@ -103,15 +118,44 @@ func hit(hit_position := global_position):
 
 func take_damage(amount: int):
 	hp -= amount
+	is_aggroed = true
+	_activate_aggro()
 	if health_bar and health_bar.has_method("set_health_ratio"):
 		health_bar.set_health_ratio(float(hp) / float(max_hp))
 	if hp <= 0:
 		_die()
 
+func _activate_aggro():
+	if is_aggroed:
+		return
+	is_aggroed = true
+	print("Target aggro activated!")
+	
+	# Visual feedback - flash orange to indicate aggro
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1, 0.4, 0)
+	mat.emission_enabled = true
+	mat.emission = Color(1, 0.2, 0)
+	mat.emission_energy_multiplier = 0.8
+	if head_mesh:
+		head_mesh.material_override = mat
+	if body_mesh:
+		body_mesh.material_override = mat
+	await get_tree().create_timer(0.15).timeout
+	if is_instance_valid(self):
+		if head_mesh:
+			head_mesh.material_override = null
+		if body_mesh:
+				body_mesh.material_override = null
+
 func _die():
 	var is_special = KILL_TRACKER.register_kill()
 	if is_special and HIT_EFFECT:
 		HIT_EFFECT.spawn_big(global_position, 50)
+	
+	# Activate target buff on player (faster recoil/fire rate for 5s)
+	if player_ref and player_ref.has_method("activate_target_buff"):
+		player_ref.activate_target_buff()
 	
 	killed.emit(target_grid_pos)
 	set_physics_process(false)
